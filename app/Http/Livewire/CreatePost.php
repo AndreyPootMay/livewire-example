@@ -4,21 +4,30 @@ namespace App\Http\Livewire;
 
 use App\Models\Post;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class CreatePost extends Component
 {
+    use WithFileUploads;
+
     /**
      * Manage the status of the modal
      * @var bool
      */
     public $open = false;
 
-    public $title, $content;
+    public $title, $content, $image, $identifier;
 
     protected $rules = [
         'title' => 'required|max:20',
         'content' => 'required|max:100',
+        'image' => 'required|image|max:2048'
     ];
+
+    public function mount(): void
+    {
+        $this->identifier = rand();
+    }
 
     /**
      * Manage the validation of a form property reactively
@@ -38,12 +47,17 @@ class CreatePost extends Component
     {
         $this->validate();
 
+        $image = $this->image->store('posts');
+
         Post::create([
             'title' => $this->title,
-            'content' => $this->content
+            'content' => $this->content,
+            'image' => $image,
         ]);
 
-        $this->reset(['open', 'title', 'content']);
+        $this->reset(['open', 'title', 'content', 'image']);
+
+        $this->identifier = rand();
 
         $this->emitTo('show-posts', 'render');
         $this->emit('alert', 'The post has been created successfully!');
