@@ -14,14 +14,14 @@
             </div>
             <div class="mb-4">
                 <x-jet-label value="Contenido del post" />
-                <textarea wire:model="post.content" rows="10" class="form-control"></textarea>
+                <textarea wire:model="post.content" type="text" class="form-comtrol w-full" rows="6"></textarea>
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-jet-secondary-button wire:click="$set('open', false)">
+            <x-jet-secondary-button wire:click="$set('open', false)" class="btn btn-red">
                 Cancel
             </x-jet-secondary-button>
-            <x-jet-secondary-button wire:click="save" wire:loading.attr="disabled" class="disabled-opacity-25">
+            <x-jet-secondary-button wire:click="save" wire:loading.attr="disabled" class="disabled-opacity-25 btn btn-blue">
                 Save
             </x-jet-secondary-button>
         </x-slot>
