@@ -23,7 +23,6 @@
                 </span>
             </div>
 
-
             @if ($image)
                 <img class="mb-4" src="{{ $image->temporaryUrl() }}">
             @endif

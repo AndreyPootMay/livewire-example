@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Models\Post;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 class EditPost extends Component
 {
@@ -12,6 +13,9 @@ class EditPost extends Component
 
     public $post;
     public $open = false;
+
+    public $image;
+    public $identifier;
 
     protected $rules = [
         'post.title' => 'required',
@@ -21,14 +25,24 @@ class EditPost extends Component
     public function mount(Post $post): void
     {
         $this->post = $post;
+        $this->identifier = rand();
     }
 
     public function save()
     {
         $this->validate();
+
+        if ($this->image) {
+            Storage::delete([$this->post->image]);
+
+            $this->post->image = $this->image->store('posts');
+        }
+
         $this->post->save();
 
-        $this->reset(['open']);
+        $this->reset(['open', 'image']);
+        $this->identifier = rand();
+
         $this->emitTo('show-posts', 'render');
         $this->emit('alert', 'Post updated successfully');
     }
