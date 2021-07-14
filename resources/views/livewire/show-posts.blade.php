@@ -97,10 +97,10 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    {{-- @livewire('edit-post', ['post' => $post], key($post->id)) --}}
-                                    <a wire:click="edit({{ $post }})" class="btn btn-green">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                    @livewire('edit-post', ['post' => $post], key($post->id))
+                                    {{-- <a wire:click="edit({{ $post }})" class="btn btn-green">
+                                        <i class="fa fa-edit"></i>
+                                    </a> --}}
                                 </td>
                             </tr>
                         @endforeach
