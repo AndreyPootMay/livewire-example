@@ -1,4 +1,4 @@
-<div>
+<div wire:init="loadPosts">
     <x-slot name="header">
         <h2 class="font-semibold text-x1 text-gray-800 leading-tight">
             {{ __('Dashboard') }}
@@ -7,11 +7,23 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <x-table>
             <div class="px-6 py-4 flex items-center">
+                <div class="flex items-center">
+                    <span>Show</span>
+                    <select wire:model="quantity" class="mx-2 form-control">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+
+                    <span>Posts</span>
+                </div>
+
                 <x-jet-input type="text" class="flex-1 mr-4" placeholder="Search..." wire:model="search" />
 
                 @livewire('create-post')
             </div>
-            @if ($posts->count() > 0)
+            @if (count($posts))
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -96,16 +108,27 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    {{-- @livewire('edit-post', ['post' => $item], key($item->id)) --}}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
                                     <a wire:click="edit({{ $item }})" class="btn btn-green">
-                                        <i class="fas fa-pencil"></i>
+                                        <i class="fa fa-pencil"></i>
                                     </a>
+
+                                    @if ($item->active == 1)
+                                        <a class="btn btn-red ml-2"
+                                            wire:click="$emit('deletePost', {{ $item->id }})">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+                @if ($posts->hasPages())
+                    <div class="px-6 py-3">
+                        {{ $posts->links() }}
+                    </div>
+                @endif
             @else
                 <div class="px-6 py-4">
                     Empty set.
@@ -155,13 +178,42 @@
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-jet-secondary-button wire:click="$set('open_edit', false)" class="btn btn-red">
-                Cancel
+            <x-jet-secondary-button wire:click="$set('open_edit',false)" class="btn btn-red">
+                <i class="fa fa-times"></i> Cancel
             </x-jet-secondary-button>
-            <x-jet-secondary-button wire:click="update" wire:loading.attr="disabled"
-                class="disabled-opacity-25 btn btn-blue">
-                Save
-            </x-jet-secondary-button>
+
+            <x-jet-danger-button wire:click="update" wire:loading.attr="disabled"
+                class="disabled:opacity-25 btn btn-blue">
+                <i class="fa fa-floppy-o"></i> Save
+            </x-jet-danger-button>
         </x-slot>
     </x-jet-dialog-modal>
+
+    @push('js')
+        <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script type="text/javascript">
+            Livewire.on('click', postId => {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Livewire.emitTo('show-posts', 'delete', postId);
+
+                        Swal.fire(
+                            'Deleted!',
+                            'Your file has been deleted.',
+                            'success'
+                        )
+                    }
+                });
+            });
+        </script>
+    @endpush
 </div>

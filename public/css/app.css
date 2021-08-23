@@ -33440,6 +33440,16 @@ select {
   background-color: rgba(5, 150, 105, var(--tw-bg-opacity));
 }
 
+.btn-yellow {
+  --tw-bg-opacity: 1;
+  background-color: rgba(217, 119, 6, var(--tw-bg-opacity));
+}
+
+.btn-yellow:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(217, 119, 6, var(--tw-bg-opacity));
+}
+
 @media (min-width: 640px) {
   .sm\:container {
     width: 100%;

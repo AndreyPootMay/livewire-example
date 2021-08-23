@@ -6,16 +6,18 @@ use App\Models\Post;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class ShowPosts extends Component
 {
     use WithFileUploads;
+    use WithPagination;
 
     /**
      * Search
      * @var string
      */
-    public $search;
+    public $search = '';
 
     /**
      * The new post or the request post.
@@ -26,6 +28,21 @@ class ShowPosts extends Component
     public $identifier;
 
     public $image;
+
+    /**
+     * Quantity of posts.
+     * @var int
+     */
+    public $quantity = '10';
+
+    public $readyToLoad = false;
+
+    protected $queryString = [
+        'quantity' => ['except' => '10'],
+        'sort' => ['except' => 'id'],
+        'direction' => ['except' => 'desc'],
+        'search' => ['except' => '']
+    ];
 
     /**
      * Manage the status of the edit modal.
@@ -46,7 +63,7 @@ class ShowPosts extends Component
      */
     public $direction = 'desc';
 
-    protected $listeners = ['render'];
+    protected $listeners = ['render', 'delete'];
 
     /**
      * Manage the mount of the livewire component.
@@ -57,6 +74,27 @@ class ShowPosts extends Component
         $this->identifier = rand();
         $this->open_edit = false;
         $this->post = new Post();
+    }
+
+    /**
+     * Loading posts.
+     * @return void
+     */
+    public function loadPosts(): void
+    {
+        $this->readyToLoad = true;
+    }
+
+    /**
+     * Lifecycle function in livewire.
+     * Trigger and reset pagination if the $search property
+     * has been changed.
+     * @url https://laravel-livewire.com/docs/2.x/lifecycle-hooks
+     * @return  void
+     */
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
     }
 
     /**
@@ -74,10 +112,17 @@ class ShowPosts extends Component
      */
     public function render()
     {
-        $posts = Post::where('title', 'like', "%{$this->search}%")
+        $posts = [];
+
+        if ($this->readyToLoad) {
+            $posts = Post::where([
+                ['title', 'like', "%{$this->search}%"],
+                ['active', '=', 1]
+            ])
             ->orWhere('content', 'like', "%{$this->search}%")
             ->orderBy($this->sort, $this->direction)
-            ->paginate(10);
+            ->paginate($this->quantity);
+        }
 
         return view('livewire.show-posts', [
             'posts' => $posts
@@ -134,5 +179,15 @@ class ShowPosts extends Component
         $this->identifier = rand();
 
         $this->emit('alert', 'Post updated successfully');
+    }
+
+    /**
+     * Manage the deletion of a post model
+     * @param   Post  $post
+     * @return  mixed
+     */
+    public function delete(Post $post): void
+    {
+        $post->update(['active' => 0]);
     }
 }
